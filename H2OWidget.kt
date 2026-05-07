@@ -54,17 +54,27 @@ class H2OWidget : AppWidgetProvider() {
                 prefs.edit().putInt(KEY_COUNT, 0).putString(KEY_DATE, getTodayString()).apply()
             }
 
-            val count    = prefs.getInt(KEY_COUNT, 0)
-            val actualMl = count * ML_PER_GLASS
-            val onTrack  = actualMl >= expectedMl()
+            val count      = prefs.getInt(KEY_COUNT, 0)
+            val actualMl   = count * ML_PER_GLASS
+            val expectedMl = expectedMl()
 
             val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-            // Серый = отстаём, зелёный = в норме или опережаем
-            val bgColor = if (onTrack) Color.parseColor("#4CAF50") else Color.parseColor("#757575")
+            // Цвет по зонам отставания:
+            // факт >= расчёт           → зелёный
+            // факт >= расчёт * 0.80    → серый     (0–20% ниже)
+            // факт >= расчёт * 0.60    → оранжевый (20–40% ниже)
+            // факт <  расчёт * 0.60    → красный   (>40% ниже)
+            val bgColor = when {
+                expectedMl == 0                    -> Color.parseColor("#4CAF50")
+                actualMl >= expectedMl             -> Color.parseColor("#4CAF50")
+                actualMl >= expectedMl * 0.80      -> Color.parseColor("#757575")
+                actualMl >= expectedMl * 0.60      -> Color.parseColor("#FF9800")
+                else                               -> Color.parseColor("#F44336")
+            }
             views.setInt(R.id.btn_background, "setBackgroundColor", bgColor)
 
-            views.setTextViewText(R.id.tv_label, "H2O")
+            views.setTextViewText(R.id.tv_label, "H\u2082O")  // H₂O — unicode subscript 2
             views.setTextViewText(R.id.tv_count, if (count >= MAX_GLASSES) "✓" else "$count")
 
             // Обработчик нажатия
