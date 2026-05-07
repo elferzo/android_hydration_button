@@ -68,7 +68,7 @@ class H2OWidget : AppWidgetProvider() {
             val bgColor = when {
                 expectedMl == 0                    -> Color.parseColor("#4CAF50")
                 actualMl >= expectedMl             -> Color.parseColor("#4CAF50")
-                actualMl >= expectedMl * 0.80      -> Color.parseColor("#757575")
+                actualMl >= expectedMl * 0.80      -> Color.parseColor("#29B6F6")
                 actualMl >= expectedMl * 0.60      -> Color.parseColor("#FF9800")
                 else                               -> Color.parseColor("#F44336")
             }
